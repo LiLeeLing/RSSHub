@@ -1,11 +1,12 @@
-import { Context } from 'hono';
+import { load } from 'cheerio';
+import type { Context } from 'hono';
+import { FetchError } from 'ofetch';
+
+import { config } from '@/config';
+import InvalidParameterError from '@/errors/types/invalid-parameter';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { config } from '@/config';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
-import { FetchError } from 'ofetch';
 
 const TOKEN = 'Basic YW5vbnltb3VzOkdpQ2VMRWp4bnFCY1ZwbnA2Y0xzVXZKaWV2dlJRY0FYTHY=';
 
@@ -39,7 +40,6 @@ export const processFeed = async (model: string, ctx: Context) => {
     const key = {
         email: config.initium.username,
         password: config.initium.password,
-        iapReceipt: config.initium.iap_receipt,
     };
     const body = JSON.stringify(key);
 
@@ -59,25 +59,11 @@ export const processFeed = async (model: string, ctx: Context) => {
                 Accept: 'application/json',
                 Connection: 'keep-alive',
                 Authorization: TOKEN,
-                Origin: `https://theinitium.com/`,
-                Referer: `https://theinitium.com/`,
-                'X-Client-Name': 'Web',
             },
             body,
         });
 
-        /*
-        const devices = login.data.access.devices;
-
-        for (const key in devices) {
-            const device = devices[key];
-            if (device.status === 'logged_in' && !device.logout_at && device.platform === 'web') {
-                token = 'Bearer ' + device.device_id;
-                break;
-            }
-        }
-        */
-        token = 'Bearer ' + login.data.token;
+        token = 'token ' + login.data.token;
         cache.set('initium:token', token);
     }
 
@@ -85,7 +71,6 @@ export const processFeed = async (model: string, ctx: Context) => {
         Accept: '*/*',
         Connection: 'keep-alive',
         Authorization: token,
-        'X-IAP-Receipt': key.iapReceipt || '',
     };
 
     let response;
@@ -154,7 +139,7 @@ export const processFeed = async (model: string, ctx: Context) => {
     const items = await Promise.all(
         articles
             .filter((a) => a.article)
-            .slice(0, token === TOKEN && key.iapReceipt === undefined ? 25 : articles.length)
+            .slice(0, token === TOKEN ? 25 : articles.length)
             .map(async (item) => {
                 item.article.date = parseDate(item.article.date);
                 item.article.updated = parseDate(item.article.updated);

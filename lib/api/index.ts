@@ -1,10 +1,13 @@
 // import { route as rulesRoute, handler as rulesHandler } from '@/api/radar/rules';
-import { route as namespaceAllRoute, handler as namespaceAllHandler } from '@/api/namespace/all';
-import { route as namespaceOneRoute, handler as namespaceOneHandler } from '@/api/namespace/one';
-import { route as radarRulesAllRoute, handler as radarRulesAllHandler } from '@/api/radar/rules/all';
-import { route as radarRulesOneRoute, handler as radarRulesOneHandler } from '@/api/radar/rules/one';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { swaggerUI } from '@hono/swagger-ui';
+import { Scalar } from '@scalar/hono-api-reference';
+
+import { handler as categoryOneHandler, route as categoryOneRoute } from '@/api/category/one';
+import { handler as followConfigHandler, route as followConfigRoute } from '@/api/follow/config';
+import { handler as namespaceAllHandler, route as namespaceAllRoute } from '@/api/namespace/all';
+import { handler as namespaceOneHandler, route as namespaceOneRoute } from '@/api/namespace/one';
+import { handler as radarRulesAllHandler, route as radarRulesAllRoute } from '@/api/radar/rules/all';
+import { handler as radarRulesOneHandler, route as radarRulesOneRoute } from '@/api/radar/rules/one';
 
 const app = new OpenAPIHono();
 
@@ -12,6 +15,8 @@ app.openapi(namespaceAllRoute, namespaceAllHandler);
 app.openapi(namespaceOneRoute, namespaceOneHandler);
 app.openapi(radarRulesAllRoute, radarRulesAllHandler);
 app.openapi(radarRulesOneRoute, radarRulesOneHandler);
+app.openapi(categoryOneRoute, categoryOneHandler);
+app.openapi(followConfigRoute, followConfigHandler);
 
 const docs = app.getOpenAPI31Document({
     openapi: '3.1.0',
@@ -24,8 +29,7 @@ for (const path in docs.paths) {
     docs.paths[`/api${path}`] = docs.paths[path];
     delete docs.paths[path];
 }
-app.get('/docs', (ctx) => ctx.json(docs));
-
-app.get('/ui', swaggerUI({ url: '/api/docs' }));
+app.get('/openapi.json', (ctx) => ctx.json(docs));
+app.get('/reference', Scalar({ content: docs }));
 
 export default app;

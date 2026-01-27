@@ -1,7 +1,8 @@
-import { Route } from '@/types';
-import utils from './utils';
 import { config } from '@/config';
 import ConfigNotFoundError from '@/errors/types/config-not-found';
+import type { Route } from '@/types';
+
+import utils from './utils';
 
 export const route: Route = {
     path: '/trends/:woeid?',
@@ -32,7 +33,7 @@ async function handler(ctx) {
 
     return {
         title: `Twitter Trends on ${data[0].locations[0].name}`,
-        link: `https://twitter.com/i/trends`,
+        link: `https://x.com/i/trends`,
         item: trends
             .filter((t) => !t.promoted_content)
             .map((t) => ({

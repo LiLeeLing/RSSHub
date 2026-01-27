@@ -1,8 +1,9 @@
-import { Route } from '@/types';
+import type { Route } from '@/types';
 import got from '@/utils/got';
-import auth from './auth';
-import { generateData } from '../pin/utils';
 import { parseDate } from '@/utils/parse-date';
+
+import { generateData } from '../pin/utils';
+import auth from './auth';
 
 export const route: Route = {
     path: '/xhu/collection/:id',
@@ -28,7 +29,7 @@ export const route: Route = {
 };
 
 async function handler(ctx) {
-    const xhuCookie = await auth.getCookie(ctx);
+    const xhuCookie = await auth.getCookie();
     const id = ctx.req.param('id');
     const link = `https://www.zhihu.com/collection/${id}`;
 

@@ -1,13 +1,12 @@
-import { namespaces } from '@/registry';
+import type { RouteHandler } from '@hono/zod-openapi';
+import { createRoute } from '@hono/zod-openapi';
 import { parse } from 'tldts';
-import { RadarItem } from '@/types';
-import { createRoute, RouteHandler } from '@hono/zod-openapi';
+
+import { namespaces } from '@/registry';
+import type { RadarDomain } from '@/types';
 
 const radar: {
-    [domain: string]: {
-        _name: string;
-        [subdomain: string]: RadarItem[] | string;
-    };
+    [domain: string]: RadarDomain;
 } = {};
 
 for (const namespace in namespaces) {
@@ -23,7 +22,7 @@ for (const namespace in namespaces) {
                     if (!radar[domain]) {
                         radar[domain] = {
                             _name: namespaces[namespace].name,
-                        };
+                        } as RadarDomain;
                     }
                     if (!radar[domain][subdomain]) {
                         radar[domain][subdomain] = [];
@@ -56,4 +55,4 @@ const route = createRoute({
 
 const handler: RouteHandler<typeof route> = (ctx) => ctx.json(radar);
 
-export { route, handler };
+export { handler, route };

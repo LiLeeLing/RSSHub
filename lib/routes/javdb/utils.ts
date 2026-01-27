@@ -1,11 +1,12 @@
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
-import { config } from '@/config';
 import { Cookie, CookieJar } from 'tough-cookie';
 
+import { config } from '@/config';
 import ConfigNotFoundError from '@/errors/types/config-not-found';
+import cache from '@/utils/cache';
+import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
+
 const allowDomain = new Set(['javdb.com', 'javdb36.com', 'javdb007.com', 'javdb521.com']);
 
 const ProcessItems = async (ctx, currentUrl, title) => {
@@ -33,6 +34,9 @@ const ProcessItems = async (ctx, currentUrl, title) => {
         method: 'get',
         url: url.href,
         cookieJar,
+        headers: {
+            'User-Agent': config.trueUA,
+        },
     });
 
     const $ = load(response.data);
@@ -58,6 +62,9 @@ const ProcessItems = async (ctx, currentUrl, title) => {
                     method: 'get',
                     url: item.link,
                     cookieJar,
+                    headers: {
+                        'User-Agent': config.trueUA,
+                    },
                 });
 
                 const content = load(detailResponse.data);

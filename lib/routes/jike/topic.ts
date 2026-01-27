@@ -1,17 +1,27 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
-import { topicDataHanding, constructTopicEntry } from './utils';
 import { load } from 'cheerio';
 import dayjs from 'dayjs';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
+import got from '@/utils/got';
+
+import { constructTopicEntry, topicDataHanding } from './utils';
 
 const urlRegex = /(https?:\/\/[^\s"'<>]+)/g;
 
 export const route: Route = {
     path: '/topic/:id/:showUid?',
     categories: ['social-media'],
+    view: ViewType.SocialMedia,
     example: '/jike/topic/556688fae4b00c57d9dd46ee',
-    parameters: { id: '圈子 id, 可在即刻 web 端圈子页或 APP 分享出来的圈子页 URL 中找到', showUid: '是否在内容中显示用户信息，设置为 1 则开启' },
+    parameters: {
+        id: '圈子 id, 可在即刻 web 端圈子页或 APP 分享出来的圈子页 URL 中找到',
+        showUid: {
+            description: '是否在内容中显示用户信息，设置为 1 则开启',
+            options: [{ value: '1', label: '显示' }],
+        },
+    },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -54,8 +64,8 @@ async function handler(ctx) {
                             const links = upper.find('a').map((_, ele) => $(ele).attr('href'));
                             const texts = upper.find('span.text').map((_, ele) => $(ele).text());
                             let description = '';
-                            for (const [i, link] of links.entries()) {
-                                description += `${i + 1}、<a href="${link}">${texts[i]}</a><br>`;
+                            for (let i = 0; i < links.length; i++) {
+                                description += `${i + 1}、<a href="${links[i]}">${texts[i]}</a><br>`;
                             }
                             description = description.replace(/<br>$/, '');
                             return description;

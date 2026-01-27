@@ -1,5 +1,6 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
-import { Route } from '@/types';
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import { isValidHost } from '@/utils/valid-host';
@@ -8,6 +9,7 @@ export const route: Route = {
     path: '/user/:name?',
     categories: ['social-media'],
     example: '/lofter/user/i',
+    view: ViewType.Articles,
     parameters: { name: 'Lofter user name, can be found in the URL' },
     features: {
         requireConfig: false,
@@ -74,7 +76,7 @@ async function handler(ctx) {
 
     return {
         title: `${items[0].author} | LOFTER`,
-        link: rootUrl,
+        link: `https://${rootUrl}`,
         item: items,
         description: response.data.response.posts[0].post.blogInfo.selfIntro,
     };
